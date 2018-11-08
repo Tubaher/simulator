@@ -2,7 +2,7 @@ module Main where
 
 import System.Environment
 import qualified Data.ByteString.Lazy.Char8 as BStr
-
+import Types
 type Frame = [Integer]
 
 toNumber :: String -> Integer
@@ -15,7 +15,7 @@ findFrame :: [Integer] -> Integer
 findFrame [_,n,_,_] = n `div` (512::Integer)
 
 arrayFrames :: [[Integer]]
-arrayFrames  = replicate 32 [0,0,2] -- quiere decir que se incializo la memoria
+arrayFrames  = replicate 32 [0,0,2] -- 2 quiere decir que se incializo la memoria
 
 toArrayNumber :: [[BStr.ByteString]] -> [[Integer]]
 toArrayNumber x = map (\l -> (map (toNumber . BStr.unpack) l)) x
