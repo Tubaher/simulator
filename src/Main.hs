@@ -3,7 +3,6 @@ module Main where
 import System.Environment
 import qualified Data.ByteString.Lazy.Char8 as BStr
 import Types
-type Frame = [Integer]
 
 toNumber :: String -> Integer
 toNumber s 
@@ -11,11 +10,11 @@ toNumber s
         | s == "R" = 0
         | otherwise = read s 
 
-findFrame :: [Integer] -> Integer
-findFrame [_,n,_,_] = n `div` (512::Integer)
+findLogicalPage :: Frame -> IdLogicalPage
+findLogicalPage [_,n,_,_] = n `div` (512::Integer)
 
-arrayFrames :: [[Integer]]
-arrayFrames  = replicate 32 [0,0,2] -- 2 quiere decir que se incializo la memoria
+arrayMemory :: Memory
+arrayMemory  = replicate 32 [0,0,0,2] -- 2 quiere decir que se incializo la memoria
 
 toArrayNumber :: [[BStr.ByteString]] -> [[Integer]]
 toArrayNumber x = map (\l -> (map (toNumber . BStr.unpack) l)) x
