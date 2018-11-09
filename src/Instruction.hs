@@ -1,4 +1,6 @@
 module Instruction(
+        Instruction(..),
+        InstructionBlock(..),
         toInstruction
 ) where
 

@@ -5,7 +5,47 @@ import qualified Frame as Fr
 import Extra
 import Instruction
 
+searchAndInsert :: Fr.Frame -> [Fr.Frame] -> [Fr.Frame]
+searchAndInsert f (x:xs)
+      | (Fr.dirtyBit x) == 2 = f:xs
+      | otherwise = x:(searchAndInsert f xs)
 
+addFrame :: Fr.Frame -> Fr.Memory -> Fr.Memory
+addFrame frame memory = newMemory
+      where fb = searchAndInsert frame (Fr.frameBlock memory)
+            pf = Fr.pageFaults memory
+            rc = Fr.readingCounter memory
+            wc = Fr.writingCounter memory
+            newMemory = Fr.toMemory (fb,pf,rc,wc)    
+
+changeAtributesMemory:: Integer -> Fr.Memory -> Fr.Memory
+changeAtributesMemory dirty memory = newMemory
+      where fb = Fr.frameBlock memory
+            pf = (Fr.pageFaults memory) + 1
+            rc = (Fr.readingCounter memory) + 1
+            wc = (Fr.writingCounter memory) + dirty
+            newMemory = Fr.toMemory (fb,pf,rc,wc)
+
+etapaUno :: Instruction -> Fr.Memory -> Fr.Memory
+etapaUno instruct memory = changeAtributesMemory 0 (addFrame (Fr.toFrame [ip,ilp,r,d]) memory) 
+      where ip = idProcess instruct
+            ilp = idInstruction instruct
+            r = 1
+            d = 0
+
+etapaDos :: Instruction -> Fr.Memory -> Fr.Memory
+etapaDos instruct memory = changeAtributesMemory d (addFrame (Fr.toFrame [ip,ilp,r,d]) memory) 
+      where ip = idProcess instruct
+            ilp = idData instruct
+            r = 1
+            d = writeOrRead instruct
+
+executeInstruction :: Instruction -> Fr.Memory -> Fr.Memory
+executeInstruction instruct memory = etapaDos instruct (etapaUno instruct memory)
+
+notRecentlyUsed :: InstructionBlock -> Fr.Memory -> Fr.Memory
+notRecentlyUsed (x:[]) memory = executeInstruction x memory
+notRecentlyUsed (x:xs) memory = notRecentlyUsed xs (executeInstruction x memory)
 
 -- changedFrame :: [Integer] -> [Integer] -> [Integer]
 -- changedFrame instruct frame = [idFrame,1, wOr]
